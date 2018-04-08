@@ -77,6 +77,26 @@ std::string clothing_layer( item const &worn_item )
     return layer;
 }
 
+nc_color clothing_layerColor(item const &worn_item)
+{
+	std::string layer;
+
+	if (worn_item.has_flag("SKINTIGHT")) {
+		return c_light_green;
+	}
+	else if (worn_item.has_flag("WAIST")) {
+		return c_light_cyan;
+	}
+	else if (worn_item.has_flag("OUTER")) {
+		return c_light_blue;
+	}
+	else if (worn_item.has_flag("BELTED")) {
+		return c_brown;
+	}
+
+	return c_light_gray;
+}
+
 std::vector<std::string> clothing_properties( item const &worn_item, int const width )
 {
     std::vector<std::string> props;
@@ -158,11 +178,13 @@ struct layering_item_info {
     nc_color damage;
     int encumber;
     std::string name;
+	nc_color layer;
     // Operator overload required to leverage vector equality operator.
     bool operator ==( const layering_item_info &o ) const {
         return this->damage == o.damage &&
                this->encumber == o.encumber &&
-               this->name == o.name;
+               this->name == o.name &&
+			   this->layer == o.layer;
     }
 };
 
@@ -171,7 +193,7 @@ static std::vector<layering_item_info> items_cover_bp( const Character &c, int b
     std::vector<layering_item_info> s;
     for( auto &elem : c.worn ) {
         if( elem.covers( static_cast<body_part>( bp ) ) ) {
-            layering_item_info t = { elem.damage_color(), elem.get_encumber(), elem.type_name( 1 ) };
+            layering_item_info t = { elem.damage_color(), elem.get_encumber(), elem.type_name( 1 ), clothing_layerColor(elem) };
             s.push_back( t );
         }
     }
@@ -351,7 +373,8 @@ void player::sort_armor()
             trim_and_print( w_sort_left, drawindex + 1, offset_x, left_w - offset_x - 3,
                             tmp_worn[itemindex]->damage_color(),
                             tmp_worn[itemindex]->type_name( 1 ).c_str() );
-            right_print( w_sort_left, drawindex + 1, 0, c_light_gray,
+            right_print( w_sort_left, drawindex + 1, 0, 
+						 clothing_layerColor(*tmp_worn[itemindex]),								
                          format_volume( tmp_worn[itemindex]->get_storage() ) );
         }
 
@@ -401,7 +424,7 @@ void player::sort_armor()
                 if( rightListSize >= rightListOffset && pos <= cont_h - 2 ) {
                     trim_and_print( w_sort_right, pos, 2, right_w - 4, elem.damage,
                                     elem.name.c_str() );
-                    mvwprintz( w_sort_right, pos, right_w - 3, c_light_gray, "%3d",
+                    mvwprintz( w_sort_right, pos, right_w - 3, elem.layer, "%3d",
                                elem.encumber );
                     pos++;
                 }
