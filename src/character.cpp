@@ -1489,6 +1489,11 @@ void layer_item( std::array<encumbrance_data, num_bp> &vals,
 
     const int armorenc = !power_armor || !it.is_power_armor() ?
         encumber_val : std::max( 0, encumber_val - 40 );
+    
+
+    for (auto bp : it.get_covered_body_parts().parts) {
+        
+    }
 
     for( const body_part bp : all_body_parts ) {
         if( !it.covers( bp ) ) {
