@@ -12838,7 +12838,7 @@ void game::update_stair_monsters()
             add_msg(m_warning,
                     _("The %s tried to push you back but failed! It attacks you!"),
                     critter.name().c_str());
-            critter.melee_attack(u, false);
+            critter.melee_attack( u );
             u.moves -= 50;
             return;
         } else if( monster *const mon_ptr = critter_at<monster>( dest ) ) {
@@ -13759,5 +13759,5 @@ std::string game::get_player_base_save_path() const
 
 std::string game::get_world_base_save_path() const
 {
-    return world_generator->active_world->world_path;
+    return world_generator->active_world->folder_path();
 }
