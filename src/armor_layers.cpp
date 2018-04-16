@@ -24,40 +24,22 @@ std::vector<std::string> clothing_flags_description( item const &worn_item );
 
 void draw_mid_pane( const catacurses::window &w_sort_middle, item const &worn_item )
 {
-    const int win_width = getmaxx( w_sort_middle );
+    /*const int win_width = getmaxx( w_sort_middle );
     const size_t win_height = ( size_t )getmaxy( w_sort_middle );
     size_t i = fold_and_print( w_sort_middle, 0, 1, win_width - 1, c_white,
-                               worn_item.type_name( 1 ) ) - 1;
-    std::vector<std::string> props = clothing_properties( worn_item, win_width - 3 );
-    nc_color color = c_light_gray;
-    for( auto &iter : props ) {
-        print_colored_text( w_sort_middle, ++i, 2, color, c_light_gray, iter.c_str() );
-    }
+                               worn_item.type_name( 1 ) ) - 1;*/
 
-    std::vector<std::string> prot = clothing_protection( worn_item, win_width - 3 );
-    if( i + prot.size() < win_height ) {
-        for( auto &iter : prot ) {
-            print_colored_text( w_sort_middle, ++i, 2, color, c_light_gray, iter.c_str() );
-        }
-    } else {
-        return;
-    }
+    std::vector<iteminfo> infos, strippedInfos, dummy;
+    int scrollPos;
 
-    i++;
-    std::vector<std::string> layer_desc = foldstring( clothing_layer( worn_item ), win_width );
-    if( i + layer_desc.size() < win_height && !clothing_layer( worn_item ).empty() ) {
-        for( auto &iter : layer_desc ) {
-            mvwprintz( w_sort_middle, ++i, 0, c_light_blue, iter.c_str() );
-        }
-    }
+    // get item infos, extract ARMOR & DESCRIPTION parts
+    worn_item.info(false, infos);
+    auto it = std::copy_if(infos.begin(), 
+                           infos.end(), 
+                           std::back_inserter(strippedInfos), 
+                           [](iteminfo info) { return info.sType == "ARMOR" || info.sType == "DESCRIPTION"; });
 
-    i++;
-    std::vector<std::string> desc = clothing_flags_description( worn_item );
-    if( !desc.empty() ) {
-        for( size_t j = 0; j < desc.size() && i + j < win_height; ++j ) {
-            i += -1 + fold_and_print( w_sort_middle, i + j, 0, win_width, c_light_blue, desc[j] );
-        }
-    }
+    draw_item_info(w_sort_middle, worn_item.tname(), worn_item.type_name(), strippedInfos, dummy, scrollPos, true, true, false, false, false);
 }
 
 std::string clothing_layer( item const &worn_item )
@@ -288,7 +270,7 @@ void player::sort_armor()
     catacurses::window w_sort_cat = catacurses::newwin( 1, win_w - 4, win_y + 1, win_x + 2 );
     catacurses::window w_sort_left = catacurses::newwin( cont_h, left_w,   win_y + 3, win_x + 1 );
     catacurses::window w_sort_middle = catacurses::newwin( cont_h - num_bp - 1, middle_w, win_y + 3,
-                                       win_x + left_w + 2 );
+                                       win_x + left_w + 3 );
     catacurses::window w_sort_right = catacurses::newwin( cont_h, right_w,  win_y + 3,
                                       win_x + left_w + middle_w + 3 );
     catacurses::window w_encumb = catacurses::newwin( num_bp + 1, middle_w,

@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <set>
 #include <map>
+#include <bitset>
 
 #include "visitable.h"
 #include "string_id.h"
@@ -82,6 +83,13 @@ extern light_emission nolight;
 namespace io {
 struct object_archive_tag;
 }
+
+enum iteminfo_parts {
+    TEXT = 0,
+    
+    // element count tracker
+    NUM_VALUES = 1
+};
 
 /**
  *  Value and metadata for one property of an item
@@ -381,6 +389,21 @@ class item : public visitable<item>
     * @param batch The batch crafting number to multiply data by
     */
     std::string info( bool showtext, std::vector<iteminfo> &dump, int batch ) const;
+
+    /**
+    * Return all the information about the item and its type, and dump to vector.
+    *
+    * This includes the different
+    * properties of the @ref itype (if they are visible to the player). The returned string
+    * is already translated and can be *very* long.
+    * @param parts controls which parts of the iteminfo to return.
+    * @param dump The properties (encapsulated into @ref iteminfo) are added to this vector,
+    * the vector can be used to compare them to properties of another item.
+    * @param batch The batch crafting number to multiply data by
+    */
+    std::string info(const std::bitset<iteminfo_parts::NUM_VALUES> &parts, std::vector<iteminfo> &dump, int batch) const;
+
+    static std::bitset<iteminfo_parts::NUM_VALUES> iteminfo_all;
 
     /** Burns the item. Returns true if the item was destroyed. */
     bool burn( fire_data &bd, bool contained );

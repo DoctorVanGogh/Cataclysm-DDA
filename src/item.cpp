@@ -696,6 +696,8 @@ static int get_ranged_pierce( const common_ranged_data &ranged )
     return ranged.damage.damage_units.front().res_pen;
 }
 
+std::bitset<iteminfo_parts::NUM_VALUES> item::iteminfo_all = std::bitset<iteminfo_parts::NUM_VALUES>(std::string(iteminfo_parts::NUM_VALUES, '1'));
+
 std::string item::info( bool showtext ) const
 {
     std::vector<iteminfo> dummy;
@@ -706,7 +708,18 @@ std::string item::info( bool showtext, std::vector<iteminfo> &iteminfo ) const {
     return info( showtext, iteminfo, 1 );
 }
 
-std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) const
+std::string item::info(bool showtext, std::vector<iteminfo> &iteminfo, int batch) const {
+	std::bitset<iteminfo_parts::NUM_VALUES> parts = iteminfo_all;
+
+	if (!showtext) {
+		parts = std::bitset<iteminfo_parts::NUM_VALUES>(parts);
+		parts.reset(iteminfo_parts::TEXT);
+	}
+
+	return info( parts, iteminfo, batch );
+}
+
+std::string item::info( const std::bitset<iteminfo_parts::NUM_VALUES> &parts, std::vector<iteminfo> &info, int batch) const
 {
     std::stringstream temp1, temp2;
     std::string space = "  ";
@@ -1528,7 +1541,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
         }
     }
 
-    if( showtext && !is_null() ) {
+    if( parts.test(iteminfo_parts::TEXT) && !is_null() ) {
         const std::map<std::string, std::string>::const_iterator idescription =
             item_vars.find( "description" );
         insert_separation_line();
