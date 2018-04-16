@@ -696,7 +696,14 @@ static int get_ranged_pierce( const common_ranged_data &ranged )
     return ranged.damage.damage_units.front().res_pen;
 }
 
-std::bitset<iteminfo_parts::NUM_VALUES> item::iteminfo_all = std::bitset<iteminfo_parts::NUM_VALUES>(std::string(iteminfo_parts::NUM_VALUES, '1'));
+const std::bitset<iteminfo_parts::MAX_VALUE + 1> iteminfo_part_presets::all = std::bitset<iteminfo_parts::MAX_VALUE + 1>(std::string(iteminfo_parts::MAX_VALUE + 1, '1'));
+const std::bitset<iteminfo_parts::MAX_VALUE + 1> iteminfo_part_presets::notext = std::bitset<iteminfo_parts::MAX_VALUE + 1>(std::string(iteminfo_parts::MAX_VALUE, '1') + "0");
+
+iteminfo_part_presets::iteminfo_part_presets() 
+{
+    // @todo: create derived presets here
+}
+
 
 std::string item::info( bool showtext ) const
 {
@@ -709,17 +716,10 @@ std::string item::info( bool showtext, std::vector<iteminfo> &iteminfo ) const {
 }
 
 std::string item::info(bool showtext, std::vector<iteminfo> &iteminfo, int batch) const {
-	std::bitset<iteminfo_parts::NUM_VALUES> parts = iteminfo_all;
-
-	if (!showtext) {
-		parts = std::bitset<iteminfo_parts::NUM_VALUES>(parts);
-		parts.reset(iteminfo_parts::TEXT);
-	}
-
-	return info( parts, iteminfo, batch );
+	return info( iteminfo, batch, showtext ? iteminfo_part_presets::all : iteminfo_part_presets::notext );
 }
 
-std::string item::info( const std::bitset<iteminfo_parts::NUM_VALUES> &parts, std::vector<iteminfo> &info, int batch) const
+std::string item::info(std::vector<iteminfo> &info, int batch, const std::bitset<iteminfo_parts::MAX_VALUE + 1> &parts) const
 {
     std::stringstream temp1, temp2;
     std::string space = "  ";
@@ -733,7 +733,7 @@ std::string item::info( const std::bitset<iteminfo_parts::NUM_VALUES> &parts, st
         }
     };
 
-    if( !is_null() ) {
+    if( !is_null() && parts.test(iteminfo_parts::BASE) ) {
         info.push_back( iteminfo( "BASE", _( "Category: " ), "<header>" + get_category().name + "</header>",
                                   -999, true, "", false ) );
         const int price_preapoc = price( false ) * batch;
@@ -854,7 +854,7 @@ std::string item::info( const std::bitset<iteminfo_parts::NUM_VALUES> &parts, st
     } else if( is_food_container() ) {
         food_item = &contents.front();
     }
-    if( food_item != nullptr ) {
+    if( food_item != nullptr) {
         if( g->u.nutrition_for( *food_item ) != 0 || food_item->type->comestible->quench != 0 ) {
             info.push_back( iteminfo( "FOOD", _( "<bold>Nutrition</bold>: " ), "", g->u.nutrition_for( *food_item ),
                                       true, "", false, true ) );
@@ -1250,7 +1250,7 @@ std::string item::info( const std::bitset<iteminfo_parts::NUM_VALUES> &parts, st
         info.push_back( iteminfo( "GUNMOD", temp2.str() ) );
 
     }
-    if( is_armor() ) {
+    if( is_armor() && parts.test(iteminfo_parts::ARMOR)) {
         temp1.str( "" );
         temp1 << _( "Covers: " );
         if( covers( bp_head ) ) {
@@ -1495,7 +1495,7 @@ std::string item::info( const std::bitset<iteminfo_parts::NUM_VALUES> &parts, st
         }
     }
 
-    if( !components.empty() ) {
+    if( !components.empty() && parts.test(iteminfo_parts::COMPONENTS)) {
         info.push_back( iteminfo( "DESCRIPTION", string_format( _( "Made from: %s" ),
                                   _( components_to_string().c_str() ) ) ) );
     } else {

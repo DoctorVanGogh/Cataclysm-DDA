@@ -86,9 +86,19 @@ struct object_archive_tag;
 
 enum iteminfo_parts {
     TEXT = 0,
+    BASE,
+    ARMOR,
+    COMPONENTS,
     
     // element count tracker
-    NUM_VALUES = 1
+    MAX_VALUE = COMPONENTS
+};
+
+struct iteminfo_part_presets {
+    iteminfo_part_presets();
+
+    static const std::bitset<iteminfo_parts::MAX_VALUE + 1> all;
+    static const std::bitset<iteminfo_parts::MAX_VALUE + 1> notext;
 };
 
 /**
@@ -401,9 +411,8 @@ class item : public visitable<item>
     * the vector can be used to compare them to properties of another item.
     * @param batch The batch crafting number to multiply data by
     */
-    std::string info(const std::bitset<iteminfo_parts::NUM_VALUES> &parts, std::vector<iteminfo> &dump, int batch) const;
+    std::string info(std::vector<iteminfo> &dump, int batch = 1, const std::bitset<iteminfo_parts::MAX_VALUE + 1> &parts = iteminfo_part_presets::all) const;
 
-    static std::bitset<iteminfo_parts::NUM_VALUES> iteminfo_all;
 
     /** Burns the item. Returns true if the item was destroyed. */
     bool burn( fire_data &bd, bool contained );

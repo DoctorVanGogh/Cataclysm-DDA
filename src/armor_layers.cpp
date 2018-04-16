@@ -29,17 +29,21 @@ void draw_mid_pane( const catacurses::window &w_sort_middle, item const &worn_it
     size_t i = fold_and_print( w_sort_middle, 0, 1, win_width - 1, c_white,
                                worn_item.type_name( 1 ) ) - 1;*/
 
-    std::vector<iteminfo> infos, strippedInfos, dummy;
+    std::vector<iteminfo> infos, dummy;
     int scrollPos;
 
+    static std::bitset<iteminfo_parts::MAX_VALUE + 1> parts = std::bitset<iteminfo_parts::MAX_VALUE + 1>(iteminfo_part_presets::all);
+    static std::string empty_name = std::string();
+    parts.reset(iteminfo_parts::COMPONENTS);
+
     // get item infos, extract ARMOR & DESCRIPTION parts
-    worn_item.info(false, infos);
-    auto it = std::copy_if(infos.begin(), 
+    worn_item.info(infos, 1, parts);
+    /*auto it = std::copy_if(infos.begin(), 
                            infos.end(), 
                            std::back_inserter(strippedInfos), 
-                           [](iteminfo info) { return info.sType == "ARMOR" || info.sType == "DESCRIPTION"; });
+                           [](iteminfo info) { return info.sType == "ARMOR" || info.sType == "DESCRIPTION"; });*/
 
-    draw_item_info(w_sort_middle, worn_item.tname(), worn_item.type_name(), strippedInfos, dummy, scrollPos, true, true, false, false, false);
+    draw_item_info(w_sort_middle, empty_name, worn_item.type_name(), infos, dummy, scrollPos, true, true, false, false, false);
 }
 
 std::string clothing_layer( item const &worn_item )
