@@ -696,10 +696,30 @@ static int get_ranged_pierce( const common_ranged_data &ranged )
     return ranged.damage.damage_units.front().res_pen;
 }
 
+iteminfo_query::iteminfo_query( const std::string &bits ) : std::bitset<iteminfo_parts::MAX_VALUE + 1>( bits ) {
+
+}
+
+iteminfo_query::iteminfo_query( const std::vector<iteminfo_parts> &setBits ) : std::bitset<iteminfo_parts::MAX_VALUE + 1>() {
+    for (auto &bit : setBits) {
+        this->set( bit );
+    }
+}
+
 const iteminfo_query iteminfo_part_presets::all = iteminfo_query(std::string(iteminfo_parts::MAX_VALUE + 1, '1'));
 const iteminfo_query iteminfo_part_presets::notext = iteminfo_query(std::string(iteminfo_parts::MAX_VALUE - iteminfo_parts::RANGE_TEXT_END, '1')
                                                                     + std::string(iteminfo_parts::RANGE_TEXT_END - iteminfo_parts::RANGE_TEXT_START + 1, '0')
                                                                     + std::string(iteminfo_parts::RANGE_TEXT_START, '1') );
+const iteminfo_query iteminfo_part_presets::anyflags = iteminfo_query( std::vector<iteminfo_parts> { iteminfo_parts::DESCRIPTION_FLAGS,
+                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_HELMETCOMPAT,
+                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_FITS,
+                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_VARSIZE,
+                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_SIDED,
+                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_POWERARMOR,
+                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_POWERARMOR_RADIATIONHINT,
+                                                                                                     iteminfo_parts::DESCRIPTION_IRRIDATION
+                                                                                                    } );
+
 
 iteminfo_part_presets::iteminfo_part_presets() 
 {
@@ -1744,6 +1764,10 @@ std::string item::info(std::vector<iteminfo> &info, const iteminfo_query &parts,
             }
         }
 
+        bool anyFlags = ( parts & iteminfo_part_presets::anyflags ).any();
+        if (anyFlags)
+            insert_separation_line();
+
         if (parts.test(iteminfo_parts::DESCRIPTION_FLAGS)) {
             // concatenate base and acquired flags...
             std::vector<std::string> flags;
@@ -1759,6 +1783,7 @@ std::string item::info(std::vector<iteminfo> &info, const iteminfo_query &parts,
                 }
             }
 }
+
 
         if( is_armor() ) {
             if( has_flag( "HELMET_COMPAT" ) && parts.test(iteminfo_parts::DESCRIPTION_FLAGS_HELMETCOMPAT)) {

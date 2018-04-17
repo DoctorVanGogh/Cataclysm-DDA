@@ -287,7 +287,11 @@ enum iteminfo_parts {
 *
 *   see also: item::info
 */
-typedef std::bitset<iteminfo_parts::MAX_VALUE + 1> iteminfo_query;
+class iteminfo_query : public std::bitset<iteminfo_parts::MAX_VALUE + 1> {
+public:
+    iteminfo_query( const std::string &bits );
+    iteminfo_query( const std::vector<iteminfo_parts> &setBits);
+};
 
 /**
 *   Presets of bitfields designed to query partial information about an item
@@ -299,6 +303,7 @@ struct iteminfo_part_presets {
 
     static const iteminfo_query all;
     static const iteminfo_query notext;
+    static const iteminfo_query anyflags;
 };
 
 /**

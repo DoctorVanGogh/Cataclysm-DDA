@@ -24,34 +24,37 @@ std::vector<std::string> clothing_flags_description( item const &worn_item );
 
 void draw_mid_pane( const catacurses::window &w_sort_middle, item const &worn_item )
 {
-    /*const int win_width = getmaxx( w_sort_middle );
-    const size_t win_height = ( size_t )getmaxy( w_sort_middle );
-    size_t i = fold_and_print( w_sort_middle, 0, 1, win_width - 1, c_white,
-                               worn_item.type_name( 1 ) ) - 1;*/
 
     std::vector<iteminfo> infos, dummy;
     int scrollPos;
 
-    static iteminfo_query parts;
-	parts.set( iteminfo_parts::ARMOR_BODYPARTS );
-	parts.set( iteminfo_parts::ARMOR_LAYER );
-	parts.set( iteminfo_parts::ARMOR_COVERAGE );
-	parts.set( iteminfo_parts::ARMOR_ENCUMBRANCE );
-	parts.set( iteminfo_parts::ARMOR_STORAGE );
-	parts.set( iteminfo_parts::ARMOR_PROTECTION );
-    parts.set( iteminfo_parts::DESCRIPTION_FLAGS );
-    parts.set( iteminfo_parts::DESCRIPTION_FLAGS_FITS );
+    static const iteminfo_query parts = iteminfo_query(std::vector<iteminfo_parts> {
+        iteminfo_parts::ARMOR_BODYPARTS,
+        iteminfo_parts::ARMOR_LAYER,
+        iteminfo_parts::ARMOR_COVERAGE,
+        iteminfo_parts::ARMOR_WARMTH,
+        iteminfo_parts::ARMOR_ENCUMBRANCE,
+        iteminfo_parts::ARMOR_STORAGE,
+        iteminfo_parts::ARMOR_PROTECTION,
+        iteminfo_parts::DESCRIPTION_FLAGS,
+        iteminfo_parts::DESCRIPTION_FLAGS_FITS,
+        });
 
     static std::string empty_name = std::string();
 
-    // get item infos, extract ARMOR & DESCRIPTION parts
     worn_item.info(infos, parts);
-    /*auto it = std::copy_if(infos.begin(), 
-                           infos.end(), 
-                           std::back_inserter(strippedInfos), 
-                           [](iteminfo info) { return info.sType == "ARMOR" || info.sType == "DESCRIPTION"; });*/
 
-    draw_item_info(w_sort_middle, empty_name, worn_item.type_name(), infos, dummy, scrollPos, true, true, false, false, false);
+    std::stringstream temp1;
+
+    // can't use worn_item.displayname() since that would include contained items: 'sheath with knife XYZ', 
+    // 'ammo pouch with fancy magazine foo'.... we dont really care about the contents here.
+    // @todo: maybe add an overload/optional param to displayname() to make it ignore contents?
+    temp1 << "<color_" << string_from_color( worn_item.damage_color() ) << ">" << worn_item.damage_symbol() << " </color>"
+          << worn_item.type_name();
+
+
+    draw_item_info(w_sort_middle, empty_name, temp1.str(),
+                   infos, dummy, scrollPos, true, true, false, false, false, 0);
 }
 
 std::string clothing_layer( item const &worn_item )
