@@ -198,7 +198,7 @@ void DynamicDataLoader::initialize()
     add( "requirement", []( JsonObject &jo ) { requirement_data::load_requirement( jo ); } );
     add( "trap", &trap::load_trap );
 
-	add( "clothinglayera", &clothing_layer::load );
+	add( "clothing_layer", &clothing_layer::load );
 
     add( "AMMO", []( JsonObject &jo, const std::string &src ) { item_controller->load_ammo( jo, src ); } );
     add( "GUN", []( JsonObject &jo, const std::string &src ) { item_controller->load_gun( jo, src ); } );
