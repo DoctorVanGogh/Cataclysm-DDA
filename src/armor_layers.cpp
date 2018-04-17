@@ -32,12 +32,20 @@ void draw_mid_pane( const catacurses::window &w_sort_middle, item const &worn_it
     std::vector<iteminfo> infos, dummy;
     int scrollPos;
 
-    static std::bitset<iteminfo_parts::MAX_VALUE + 1> parts = std::bitset<iteminfo_parts::MAX_VALUE + 1>(iteminfo_part_presets::all);
+    static iteminfo_query parts;
+	parts.set( iteminfo_parts::ARMOR_BODYPARTS );
+	parts.set( iteminfo_parts::ARMOR_LAYER );
+	parts.set( iteminfo_parts::ARMOR_COVERAGE );
+	parts.set( iteminfo_parts::ARMOR_ENCUMBRANCE );
+	parts.set( iteminfo_parts::ARMOR_STORAGE );
+	parts.set( iteminfo_parts::ARMOR_PROTECTION );
+    parts.set( iteminfo_parts::DESCRIPTION_FLAGS );
+    parts.set( iteminfo_parts::DESCRIPTION_FLAGS_FITS );
+
     static std::string empty_name = std::string();
-    parts.reset(iteminfo_parts::COMPONENTS);
 
     // get item infos, extract ARMOR & DESCRIPTION parts
-    worn_item.info(infos, 1, parts);
+    worn_item.info(infos, parts);
     /*auto it = std::copy_if(infos.begin(), 
                            infos.end(), 
                            std::back_inserter(strippedInfos), 

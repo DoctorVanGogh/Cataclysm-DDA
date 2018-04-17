@@ -85,9 +85,7 @@ struct object_archive_tag;
 }
 
 enum iteminfo_parts {
-    TEXT = 0,									// "legacy" - old version had a 'showtext' flag
-
-    BASE_CATEGORY,
+    BASE_CATEGORY = 0,
     BASE_PRICE,
     BASE_BARTER,
     BASE_VOLUME,
@@ -102,6 +100,7 @@ enum iteminfo_parts {
     BASE_AMOUNT,
     BASE_DEBUG,
 
+
     FOOD_NUTRITION,
     FOOD_QUENCH,
     FOOD_JOY,
@@ -114,8 +113,10 @@ enum iteminfo_parts {
     FOOD_HALLUCINOGENIC,
     FOOD_ROT,
 
+
     MAGAZINE_CAPACITY,
     MAGAZINE_RELOAD,
+
 
     AMMO_REMAINING_OR_TYPES,
     AMMO_DAMAGE_VALUE,
@@ -126,6 +127,7 @@ enum iteminfo_parts {
     AMMO_FX_RECYCLED,
     AMMO_FX_CANTMISSFIRE,
     AMMO_FX_INDENDIARY,
+
 
     DESCRIPTION_AUX_GUNMOD_HEADER,
 
@@ -163,21 +165,140 @@ enum iteminfo_parts {
     DESCRIPTION_GUN_CASINGS,
 
 
+    DESCRIPTION_GUNMOD,
+    DESCRIPTION_GUNMOD_REACH,
+
+    GUNMOD_DISPERSION,
+    GUNMOD_DISPERSION_SIGHT,
+    GUNMOD_AIMSPEED,
+    GUNMOD_DAMAGE,
+    GUNMOD_ARMORPIERCE,
+    GUNMOD_HANDLING,
+    GUNMOD_AMMO,
+
+    GUNMOD_USEDON,
+    GUNMOD_LOCATION,
 
 
+	ARMOR_BODYPARTS,
+    ARMOR_LAYER,
+    ARMOR_COVERAGE,
+    ARMOR_WARMTH,
+    ARMOR_ENCUMBRANCE,
+    ARMOR_STORAGE,
+    ARMOR_PROTECTION,
 
-	ARMOR,
-    COMPONENTS,
+
+    BOOK_SUMMARY,
+    BOOK_REQUIREMENTS_BEGINNER,
+    BOOK_SKILLRANGE_MAX,
+    BOOK_SKILLRANGE_MIN,
+    BOOK_REQUIREMENTS_INT,
+    BOOK_MORALECHANGE,
+    BOOK_TIMEPERCHAPTER,
+    BOOK_NUMUNREADCHAPTERS,
+
+    DESCRIPTION_BOOK_RECIPES,
+    DESCRIPTION_BOOK_ADDITIONAL_RECIPES,
+
+    BOOK_UNREAD,
+
+
+    CONTAINER_DETAILS,
+
+
+    TOOL_CHARGES,
+    TOOL_MAGAZINE_CURRENT,
+    TOOL_MAGAZINE_COMPATIBLE,
+    TOOL_CAPACITY,
+
+
+    DESCRIPTION_COMPONENTS_MADEFROM,
+    DESCRIPTION_COMPONENTS_DISASSEMBLE,
+
+
+    QUALITIES,
+    QUALITIES_CONTAINED,
+
+
+    DESCRIPTION,
+    DESCRIPTION_TECHNIQUES,
+    DESCRIPTION_GUNMOD_ADDREACHATTACK,
+    DESCRIPTION_MELEEDMG,
+    DESCRIPTION_MELEEDMG_CRIT,
+    DESCRIPTION_MELEEDMG_BASH,
+    DESCRIPTION_MELEEDMG_CUT,
+    DESCRIPTION_MELEEDMG_PIERCE,
+    DESCRIPTION_MELEEDMG_MOVES,
+    DESCRIPTION_APPLICABLEMARTIALARTS,
+    DESCRIPTION_REPAIREDWITH,
+
+    DESCRIPTION_CONDUCTIVITY,
+    DESCRIPTION_FLAGS,
+    DESCRIPTION_FLAGS_HELMETCOMPAT,
+    DESCRIPTION_FLAGS_FITS,
+    DESCRIPTION_FLAGS_VARSIZE,
+    DESCRIPTION_FLAGS_SIDED,
+    DESCRIPTION_FLAGS_POWERARMOR,
+    DESCRIPTION_FLAGS_POWERARMOR_RADIATIONHINT,
+    DESCRIPTION_IRRIDATION,
+
+    DESCRIPTION_RECHARGE_UPSMODDED,
+    DESCRIPTION_RECHARGE_NORELOAD,
+    DESCRIPTION_RECHARGE_UPSCAPABLE,
+
+    DESCRIPTION_RADIO_ACTIVATION,
+    DESCRIPTION_RADIO_ACTIVATION_CHANNEL,
+    DESCRIPTION_RADIO_ACTIVATION_PROC,
+
+    DESCRIPTION_CBM_SLOTS,
+
+    DESCRIPTION_TWOHANDED,
+    DESCRIPTION_GUNMOD_DISABLESSIGHTS,
+    DESCRIPTION_RADIOACTIVITY_DAMAGED,
+    DESCRIPTION_RADIOACTIVITY_ALWAYS,
+
+    DESCRIPTION_BREWABLE_DURATION,
+    DESCRIPTION_BREWABLE_PRODUCTS,
+
+    DESCRIPTION_FAULTS,
+
+    DESCRIPTION_HOLSTERS,
+
+    DESCRIPTION_ACTIVATABLE_TRANSFORMATION,
+
+    DESCRIPTION_NOTES,
+
+    DESCRIPTION_CONTENTS,
+
+    DESCRIPTION_APPLICABLE_RECIPES,
     
+    
+    // misc 'block' range trackers
+    RANGE_TEXT_START = DESCRIPTION,
+    RANGE_TEXT_END = DESCRIPTION_APPLICABLE_RECIPES,
+
     // element count tracker
-    MAX_VALUE = COMPONENTS
+    MAX_VALUE = DESCRIPTION_APPLICABLE_RECIPES
 };
 
+/**
+*   Bitfield designed to query partial information about an item
+*
+*   see also: item::info
+*/
+typedef std::bitset<iteminfo_parts::MAX_VALUE + 1> iteminfo_query;
+
+/**
+*   Presets of bitfields designed to query partial information about an item
+*
+*   see also: item::info
+*/
 struct iteminfo_part_presets {
     iteminfo_part_presets();
 
-    static const std::bitset<iteminfo_parts::MAX_VALUE + 1> all;
-    static const std::bitset<iteminfo_parts::MAX_VALUE + 1> notext;
+    static const iteminfo_query all;
+    static const iteminfo_query notext;
 };
 
 /**
@@ -490,7 +611,7 @@ class item : public visitable<item>
     * the vector can be used to compare them to properties of another item.
     * @param batch The batch crafting number to multiply data by
     */
-    std::string info(std::vector<iteminfo> &dump, int batch = 1, const std::bitset<iteminfo_parts::MAX_VALUE + 1> &parts = iteminfo_part_presets::all) const;
+    std::string info(std::vector<iteminfo> &dump, const iteminfo_query &parts = iteminfo_part_presets::all, int batch = 1) const;
 
 
     /** Burns the item. Returns true if the item was destroyed. */
