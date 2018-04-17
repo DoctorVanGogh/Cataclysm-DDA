@@ -1,35 +1,35 @@
 [
     {
         "id": "UNDERWEAR",
-        "layer": 0,
+        "layer": "UNDERWEAR",
         "type": "clothing_layer",
         "symbol": "U",
         "color": "red"
     },
     {
         "id": "REGULAR_LAYER",
-        "layer": 1,
+        "layer": "REGULAR_LAYER",
         "type": "clothing_layer",
         "symbol": "R",
         "color": "blue"
     },
     {
         "id": "WAIST_LAYER",
-        "layer": 2,
+        "layer": "WAIST_LAYER",
         "type": "clothing_layer",
         "symbol": "W",
         "color": "green"
     },
     {
         "id": "OUTER_LAYER",
-        "layer": 3,
+        "layer": "OUTER_LAYER",
         "type": "clothing_layer",
         "symbol": "O",
         "color": "mangenta"
     },
     {
         "id": "BELTED_LAYER",
-        "layer": 4,
+        "layer": "BELTED_LAYER",
         "type": "clothing_layer",
         "symbol": "B",
         "color": "yellow"

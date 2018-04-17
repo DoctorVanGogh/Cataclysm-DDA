@@ -24,6 +24,7 @@
 #include "mapdata.h"
 #include "color.h"
 #include "trap.h"
+#include "clothing_layer.h"
 #include "mission.h"
 #include "monstergenerator.h"
 #include "inventory.h"
@@ -196,6 +197,8 @@ void DynamicDataLoader::initialize()
 
     add( "requirement", []( JsonObject &jo ) { requirement_data::load_requirement( jo ); } );
     add( "trap", &trap::load_trap );
+
+	add( "clothinglayera", &clothing_layer::load );
 
     add( "AMMO", []( JsonObject &jo, const std::string &src ) { item_controller->load_ammo( jo, src ); } );
     add( "GUN", []( JsonObject &jo, const std::string &src ) { item_controller->load_gun( jo, src ); } );
@@ -375,6 +378,7 @@ void DynamicDataLoader::unload_data()
     recipe_dictionary::reset();
     faction_template::reset();
     quality::reset();
+	clothing_layer::reset();
     trap::reset();
     reset_constructions();
     overmap_terrains::reset();

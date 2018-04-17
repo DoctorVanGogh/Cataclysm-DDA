@@ -17,6 +17,7 @@
 #include "debug.h"
 #include "cata_utility.h"
 #include "calendar.h"
+#include "iteminfo_query.h"
 
 class nc_color;
 class JsonObject;
@@ -83,228 +84,6 @@ extern light_emission nolight;
 namespace io {
 struct object_archive_tag;
 }
-
-enum iteminfo_parts {
-    BASE_CATEGORY = 0,
-    BASE_PRICE,
-    BASE_BARTER,
-    BASE_VOLUME,
-    BASE_WEIGHT,
-    BASE_RIGIDITY,
-    BASE_DAMAGE,
-    BASE_TOHIT,
-    BASE_MOVES,
-    BASE_REQUIREMENTS,
-    BASE_MATERIAL,
-    BASE_CONTENTS,
-    BASE_AMOUNT,
-    BASE_DEBUG,
-
-
-    FOOD_NUTRITION,
-    FOOD_QUENCH,
-    FOOD_JOY,
-    FOOD_PORTIONS,
-    FOOD_SMELL,
-    FOOD_VITAMINS,
-    FOOD_CANNIBALISM,
-    FOOD_TAINT,
-    FOOD_POISON,
-    FOOD_HALLUCINOGENIC,
-    FOOD_ROT,
-
-
-    MAGAZINE_CAPACITY,
-    MAGAZINE_RELOAD,
-
-
-    AMMO_REMAINING_OR_TYPES,
-    AMMO_DAMAGE_VALUE,
-    AMMO_DAMAGE_AP,
-    AMMO_DAMAGE_RANGE,
-    AMMO_DAMAGE_DISPERSION,
-    AMMO_DAMAGE_RECOIL,
-    AMMO_FX_RECYCLED,
-    AMMO_FX_CANTMISSFIRE,
-    AMMO_FX_INDENDIARY,
-
-
-    DESCRIPTION_AUX_GUNMOD_HEADER,
-
-    GUN_USEDSKILL,
-    GUN_CAPACITY,
-    GUN_TYPE,
-    GUN_MAGAZINE,
-
-    AMMO_REMAINING,
-    AMMO_UPSCOST,
-
-    GUN_MAX_RANGE,
-    GUN_AIMING_STATS,
-    GUN_DAMAGE,
-    GUN_DAMAGE_LOADEDAMMO,
-    GUN_DAMAGE_TOTAL,
-    GUN_ARMORPIERCE,
-    GUN_ARMORPIERCE_LOADEDAMMO,
-    GUN_ARMORPIERCE_TOTAL,
-    GUN_DISPERSION,
-    GUN_DISPERSION_LOADEDAMMO,
-    GUN_DISPERSION_TOTAL,
-    GUN_DISPERSION_SIGHT,
-
-    GUN_RECOIL,
-    GUN_RECOIL_BIPOD,       
-
-    GUN_RECOMMENDED_STRENGTH,
-    GUN_RELOAD_TIME,
-
-    GUN_FIRE_MODES,
-    GUN_ALLOWED_MAGAZINES,
-
-    DESCRIPTION_GUN_MODS,
-    DESCRIPTION_GUN_CASINGS,
-
-
-    DESCRIPTION_GUNMOD,
-    DESCRIPTION_GUNMOD_REACH,
-
-    GUNMOD_DISPERSION,
-    GUNMOD_DISPERSION_SIGHT,
-    GUNMOD_AIMSPEED,
-    GUNMOD_DAMAGE,
-    GUNMOD_ARMORPIERCE,
-    GUNMOD_HANDLING,
-    GUNMOD_AMMO,
-
-    GUNMOD_USEDON,
-    GUNMOD_LOCATION,
-
-
-	ARMOR_BODYPARTS,
-    ARMOR_LAYER,
-    ARMOR_COVERAGE,
-    ARMOR_WARMTH,
-    ARMOR_ENCUMBRANCE,
-    ARMOR_STORAGE,
-    ARMOR_PROTECTION,
-
-
-    BOOK_SUMMARY,
-    BOOK_REQUIREMENTS_BEGINNER,
-    BOOK_SKILLRANGE_MAX,
-    BOOK_SKILLRANGE_MIN,
-    BOOK_REQUIREMENTS_INT,
-    BOOK_MORALECHANGE,
-    BOOK_TIMEPERCHAPTER,
-    BOOK_NUMUNREADCHAPTERS,
-
-    DESCRIPTION_BOOK_RECIPES,
-    DESCRIPTION_BOOK_ADDITIONAL_RECIPES,
-
-    BOOK_UNREAD,
-
-
-    CONTAINER_DETAILS,
-
-
-    TOOL_CHARGES,
-    TOOL_MAGAZINE_CURRENT,
-    TOOL_MAGAZINE_COMPATIBLE,
-    TOOL_CAPACITY,
-
-
-    DESCRIPTION_COMPONENTS_MADEFROM,
-    DESCRIPTION_COMPONENTS_DISASSEMBLE,
-
-
-    QUALITIES,
-    QUALITIES_CONTAINED,
-
-
-    DESCRIPTION,
-    DESCRIPTION_TECHNIQUES,
-    DESCRIPTION_GUNMOD_ADDREACHATTACK,
-    DESCRIPTION_MELEEDMG,
-    DESCRIPTION_MELEEDMG_CRIT,
-    DESCRIPTION_MELEEDMG_BASH,
-    DESCRIPTION_MELEEDMG_CUT,
-    DESCRIPTION_MELEEDMG_PIERCE,
-    DESCRIPTION_MELEEDMG_MOVES,
-    DESCRIPTION_APPLICABLEMARTIALARTS,
-    DESCRIPTION_REPAIREDWITH,
-
-    DESCRIPTION_CONDUCTIVITY,
-    DESCRIPTION_FLAGS,
-    DESCRIPTION_FLAGS_HELMETCOMPAT,
-    DESCRIPTION_FLAGS_FITS,
-    DESCRIPTION_FLAGS_VARSIZE,
-    DESCRIPTION_FLAGS_SIDED,
-    DESCRIPTION_FLAGS_POWERARMOR,
-    DESCRIPTION_FLAGS_POWERARMOR_RADIATIONHINT,
-    DESCRIPTION_IRRIDATION,
-
-    DESCRIPTION_RECHARGE_UPSMODDED,
-    DESCRIPTION_RECHARGE_NORELOAD,
-    DESCRIPTION_RECHARGE_UPSCAPABLE,
-
-    DESCRIPTION_RADIO_ACTIVATION,
-    DESCRIPTION_RADIO_ACTIVATION_CHANNEL,
-    DESCRIPTION_RADIO_ACTIVATION_PROC,
-
-    DESCRIPTION_CBM_SLOTS,
-
-    DESCRIPTION_TWOHANDED,
-    DESCRIPTION_GUNMOD_DISABLESSIGHTS,
-    DESCRIPTION_RADIOACTIVITY_DAMAGED,
-    DESCRIPTION_RADIOACTIVITY_ALWAYS,
-
-    DESCRIPTION_BREWABLE_DURATION,
-    DESCRIPTION_BREWABLE_PRODUCTS,
-
-    DESCRIPTION_FAULTS,
-
-    DESCRIPTION_HOLSTERS,
-
-    DESCRIPTION_ACTIVATABLE_TRANSFORMATION,
-
-    DESCRIPTION_NOTES,
-
-    DESCRIPTION_CONTENTS,
-
-    DESCRIPTION_APPLICABLE_RECIPES,
-    
-    
-    // misc 'block' range trackers
-    RANGE_TEXT_START = DESCRIPTION,
-    RANGE_TEXT_END = DESCRIPTION_APPLICABLE_RECIPES,
-
-    // element count tracker
-    MAX_VALUE = DESCRIPTION_APPLICABLE_RECIPES
-};
-
-/**
-*   Bitfield designed to query partial information about an item
-*
-*   see also: item::info
-*/
-class iteminfo_query : public std::bitset<iteminfo_parts::MAX_VALUE + 1> {
-public:
-    iteminfo_query( const std::string &bits );
-    iteminfo_query( const std::vector<iteminfo_parts> &setBits);
-};
-
-/**
-*   Presets of bitfields designed to query partial information about an item
-*
-*   see also: item::info
-*/
-struct iteminfo_part_presets {
-    iteminfo_part_presets();
-
-    static const iteminfo_query all;
-    static const iteminfo_query notext;
-    static const iteminfo_query anyflags;
-};
 
 /**
  *  Value and metadata for one property of an item
@@ -375,7 +154,7 @@ struct iteminfo {
  *  and by @ref profession to place the characters' clothing in a sane order
  *  when starting the game.
  */
-enum layer_level {
+enum class layer_level : int {
     /* "Close to skin" layer, corresponds to SKINTIGHT flag. */
     UNDERWEAR = 0,
     /* "Normal" layer, default if no flags set */
@@ -616,7 +395,7 @@ class item : public visitable<item>
     * the vector can be used to compare them to properties of another item.
     * @param batch The batch crafting number to multiply data by
     */
-    std::string info(std::vector<iteminfo> &dump, const iteminfo_query &parts = iteminfo_part_presets::all, int batch = 1) const;
+    std::string info(std::vector<iteminfo> &dump, const iteminfo_query &parts = iteminfo_query::all, int batch = 1) const;
 
 
     /** Burns the item. Returns true if the item was destroyed. */
@@ -1534,6 +1313,9 @@ public:
          * Returns clothing layer for item which will always be 0 for non-wearable items.
          */
         int get_layer() const;
+
+		layer_level layer() const;
+
         /**
          * Returns the relative coverage that this item has when worn.
          * Values range from 0 (not covering anything, or no armor at all) to

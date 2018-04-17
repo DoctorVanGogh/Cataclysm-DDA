@@ -49,6 +49,8 @@
 #include "vehicle_selector.h"
 #include "units.h"
 #include "ret_val.h"
+#include "json.h"
+#include "iteminfo_query.h"
 
 #include <cmath> // floor
 #include <sstream>
@@ -696,37 +698,6 @@ static int get_ranged_pierce( const common_ranged_data &ranged )
     return ranged.damage.damage_units.front().res_pen;
 }
 
-iteminfo_query::iteminfo_query( const std::string &bits ) : std::bitset<iteminfo_parts::MAX_VALUE + 1>( bits ) {
-
-}
-
-iteminfo_query::iteminfo_query( const std::vector<iteminfo_parts> &setBits ) : std::bitset<iteminfo_parts::MAX_VALUE + 1>() {
-    for (auto &bit : setBits) {
-        this->set( bit );
-    }
-}
-
-const iteminfo_query iteminfo_part_presets::all = iteminfo_query(std::string(iteminfo_parts::MAX_VALUE + 1, '1'));
-const iteminfo_query iteminfo_part_presets::notext = iteminfo_query(std::string(iteminfo_parts::MAX_VALUE - iteminfo_parts::RANGE_TEXT_END, '1')
-                                                                    + std::string(iteminfo_parts::RANGE_TEXT_END - iteminfo_parts::RANGE_TEXT_START + 1, '0')
-                                                                    + std::string(iteminfo_parts::RANGE_TEXT_START, '1') );
-const iteminfo_query iteminfo_part_presets::anyflags = iteminfo_query( std::vector<iteminfo_parts> { iteminfo_parts::DESCRIPTION_FLAGS,
-                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_HELMETCOMPAT,
-                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_FITS,
-                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_VARSIZE,
-                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_SIDED,
-                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_POWERARMOR,
-                                                                                                     iteminfo_parts::DESCRIPTION_FLAGS_POWERARMOR_RADIATIONHINT,
-                                                                                                     iteminfo_parts::DESCRIPTION_IRRIDATION
-                                                                                                    } );
-
-
-iteminfo_part_presets::iteminfo_part_presets() 
-{
-    // @todo: create derived presets here
-}
-
-
 std::string item::info( bool showtext ) const
 {
     std::vector<iteminfo> dummy;
@@ -738,7 +709,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &iteminfo ) const {
 }
 
 std::string item::info(bool showtext, std::vector<iteminfo> &iteminfo, int batch) const {
-	return info( iteminfo, showtext ? iteminfo_part_presets::all : iteminfo_part_presets::notext, batch);
+	return info( iteminfo, showtext ? iteminfo_query::all : iteminfo_query::notext, batch);
 }
 
 std::string item::info(std::vector<iteminfo> &info, const iteminfo_query &parts, int batch) const
@@ -1764,7 +1735,7 @@ std::string item::info(std::vector<iteminfo> &info, const iteminfo_query &parts,
             }
         }
 
-        bool anyFlags = ( parts & iteminfo_part_presets::anyflags ).any();
+        bool anyFlags = ( parts & iteminfo_query::anyflags ).any();
         if (anyFlags)
             insert_separation_line();
 
@@ -3164,18 +3135,22 @@ int item::get_encumber() const
     return encumber;
 }
 
-int item::get_layer() const
+int item::get_layer() const {
+	return static_cast<int>( layer() );
+}
+
+layer_level item::layer() const
 {
     if( has_flag("SKINTIGHT") ) {
-        return UNDERWEAR;
+        return layer_level::UNDERWEAR;
     } else if( has_flag("WAIST") ) {
-        return WAIST_LAYER;
+        return  layer_level::WAIST_LAYER;
     } else if( has_flag("OUTER") ) {
-        return OUTER_LAYER;
+        return layer_level::OUTER_LAYER;
     } else if( has_flag("BELTED") ) {
-        return BELTED_LAYER;
+        return layer_level::BELTED_LAYER;
     }
-    return REGULAR_LAYER;
+    return layer_level::REGULAR_LAYER;
 }
 
 int item::get_coverage() const
@@ -6241,4 +6216,22 @@ time_point item::birthday() const
 void item::set_birthday( const time_point bday )
 {
     this->bday = bday;
+}
+
+namespace io {
+
+	static const std::unordered_map<std::string, layer_level> layer_level_values = { {
+		{ "UNDERWEAR", layer_level::UNDERWEAR },
+		{ "REGULAR_LAYER", layer_level::REGULAR_LAYER },
+		{ "WAIST_LAYER", layer_level::WAIST_LAYER },
+		{ "OUTER_LAYER", layer_level::OUTER_LAYER },
+		{ "BELTED_LAYER", layer_level::BELTED_LAYER },
+    } };
+
+	template<>
+	layer_level string_to_enum<layer_level>( const std::string &data )
+	{
+		return string_to_enum_look_up( layer_level_values, data );
+	}
+
 }
