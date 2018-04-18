@@ -17,10 +17,6 @@
 
 namespace
 {
-std::string clothing_layer( item const &worn_item );
-std::vector<std::string> clothing_properties( item const &worn_item, int width );
-std::vector<std::string> clothing_protection( item const &worn_item, int width );
-std::vector<std::string> clothing_flags_description( item const &worn_item );
 
 void draw_mid_pane( const catacurses::window &w_sort_middle, item const &worn_item )
 {
@@ -57,22 +53,6 @@ void draw_mid_pane( const catacurses::window &w_sort_middle, item const &worn_it
                    infos, dummy, scrollPos, true, true, false, false, false, 0);
 }
 
-std::string clothing_layer( item const &worn_item )
-{
-    std::string layer;
-
-    if( worn_item.has_flag( "SKINTIGHT" ) ) {
-        layer = _( "This is worn next to the skin." );
-    } else if( worn_item.has_flag( "WAIST" ) ) {
-        layer = _( "This is worn on or around your waist." );
-    } else if( worn_item.has_flag( "OUTER" ) ) {
-        layer = _( "This is worn over your other clothes." );
-    } else if( worn_item.has_flag( "BELTED" ) ) {
-        layer = _( "This is strapped onto you." );
-    }
-
-    return layer;
-}
 
 nc_color clothing_layerColor(item const &worn_item)
 {
@@ -94,80 +74,7 @@ nc_color clothing_layerColor(item const &worn_item)
 	return c_light_gray;
 }
 
-std::vector<std::string> clothing_properties( item const &worn_item, int const width )
-{
-    std::vector<std::string> props;
-    props.reserve( 5 );
 
-    const std::string space = "  ";
-    props.push_back( string_format( "<color_c_green>[%s]</color>", _( "Properties" ) ) );
-    props.push_back( name_and_value( space + _( "Coverage:" ),
-                                     string_format( "%3d", worn_item.get_coverage() ), width ) );
-    props.push_back( name_and_value( space + _( "Encumbrance:" ),
-                                     string_format( "%3d", worn_item.get_encumber() ), width ) );
-    props.push_back( name_and_value( space + _( "Warmth:" ),
-                                     string_format( "%3d", worn_item.get_warmth() ), width ) );
-    props.push_back( name_and_value( space + string_format( _( "Storage (%s):" ), volume_units_abbr() ),
-                                     format_volume( worn_item.get_storage() ), width ) );
-    return props;
-}
-
-std::vector<std::string> clothing_protection( item const &worn_item, int const width )
-{
-    std::vector<std::string> prot;
-    prot.reserve( 4 );
-
-    const std::string space = "  ";
-    prot.push_back( string_format( "<color_c_green>[%s]</color>", _( "Protection" ) ) );
-    prot.push_back( name_and_value( space + _( "Bash:" ),
-                                    string_format( "%3d", int( worn_item.bash_resist() ) ), width ) );
-    prot.push_back( name_and_value( space + _( "Cut:" ),
-                                    string_format( "%3d", int( worn_item.cut_resist() ) ), width ) );
-    prot.push_back( name_and_value( space + _( "Environmental:" ),
-                                    string_format( "%3d", int( worn_item.get_env_resist() ) ), width ) );
-    return prot;
-}
-
-std::vector<std::string> clothing_flags_description( item const &worn_item )
-{
-    std::vector<std::string> description_stack;
-
-    if( worn_item.has_flag( "FIT" ) ) {
-        description_stack.push_back( _( "It fits you well." ) );
-    } else if( worn_item.has_flag( "VARSIZE" ) ) {
-        description_stack.push_back( _( "It could be refitted." ) );
-    }
-
-    if( worn_item.has_flag( "HOOD" ) ) {
-        description_stack.push_back( _( "It has a hood." ) );
-    }
-    if( worn_item.has_flag( "POCKETS" ) ) {
-        description_stack.push_back( _( "It has pockets." ) );
-    }
-    if( worn_item.has_flag( "WATERPROOF" ) ) {
-        description_stack.push_back( _( "It is waterproof." ) );
-    }
-    if( worn_item.has_flag( "WATER_FRIENDLY" ) ) {
-        description_stack.push_back( _( "It is water friendly." ) );
-    }
-    if( worn_item.has_flag( "FANCY" ) ) {
-        description_stack.push_back( _( "It looks fancy." ) );
-    }
-    if( worn_item.has_flag( "SUPER_FANCY" ) ) {
-        description_stack.push_back( _( "It looks really fancy." ) );
-    }
-    if( worn_item.has_flag( "FLOTATION" ) ) {
-        description_stack.push_back( _( "You will not drown today." ) );
-    }
-    if( worn_item.has_flag( "OVERSIZE" ) ) {
-        description_stack.push_back( _( "It is very bulky." ) );
-    }
-    if( worn_item.has_flag( "SWIM_GOGGLES" ) ) {
-        description_stack.push_back( _( "It helps you to see clearly underwater." ) );
-    }
-
-    return description_stack;
-}
 
 } //namespace
 
@@ -358,21 +265,54 @@ void player::sort_armor()
         mvwprintz( w_sort_left, 0, 0, c_light_gray, _( "(Innermost)" ) );
         right_print( w_sort_left, 0, 0, c_light_gray, string_format( _( "Storage (%s)" ),
                      volume_units_abbr() ) );
+
         // Left list
         for( int drawindex = 0; drawindex < leftListSize; drawindex++ ) {
             int itemindex = leftListOffset + drawindex;
 
-            if( itemindex == leftListIndex ) {
-                mvwprintz( w_sort_left, drawindex + 1, 0, c_yellow, ">>" );
+			nc_color co = c_light_gray;
+
+            if( itemindex == leftListIndex ) {                
+				co = itemindex == selected
+					? h_red
+					: h_white; 
             }
 
             const int offset_x = ( itemindex == selected ) ? 3 : 2;
-            trim_and_print( w_sort_left, drawindex + 1, offset_x, left_w - offset_x - 3,
-                            tmp_worn[itemindex]->damage_color(),
-                            tmp_worn[itemindex]->type_name( 1 ).c_str() );
-            right_print( w_sort_left, drawindex + 1, 0, 
-						 clothing_layerColor(*tmp_worn[itemindex]),								
-                         format_volume( tmp_worn[itemindex]->get_storage() ) );
+            
+			std::stringstream tmp;
+
+			tmp << get_tag_from_color( tmp_worn[itemindex]->damage_color() )
+				<< tmp_worn[itemindex]->damage_symbol() << "</color> "
+				<< tmp_worn[itemindex]->type_name( 1 ).c_str();
+
+			std::string volume = format_volume( tmp_worn[itemindex]->get_storage());
+
+			std::string text = tmp.str();
+
+			int width = utf8_width( remove_color_tags( text ) )
+				        + utf8_width( volume);
+
+            // pad line interior with spaces to highlight entire line (if applicable)
+			tmp << std::string( left_w - offset_x - width, ' ' ) << "<neutral>"
+				<< volume << "</neutral>";
+
+            // layer symbol
+			print_colored_text( w_sort_left, drawindex + 1, offset_x -2, c_light_gray, 
+				                c_light_gray, tmp_worn[itemindex]->clothingLayer() );
+
+			text = replace_colors(tmp.str());
+
+            // highlighted lines have no colorized icons/volume
+			if (itemindex == leftListIndex) {
+                // @todo: first we add the tags, then we strip them.... this could be done
+                // better...
+				text = remove_color_tags( text );
+			}
+
+            // [highlighted] line
+			print_colored_text( w_sort_left, drawindex + 1, offset_x, co, co, text );
+
         }
 
         // Left footer

@@ -51,6 +51,7 @@
 #include "ret_val.h"
 #include "json.h"
 #include "iteminfo_query.h"
+#include "clothing_layer.h"
 
 #include <cmath> // floor
 #include <sstream>
@@ -3151,6 +3152,16 @@ layer_level item::layer() const
         return layer_level::BELTED_LAYER;
     }
     return layer_level::REGULAR_LAYER;
+}
+
+const std::string item::clothingLayer() const {
+	std::stringstream tmp;
+
+	auto cl = clothing_layer::get( layer() );
+
+	tmp << get_tag_from_color( cl.color() ) << cl.symbol() << "</color>";
+
+	return tmp.str();
 }
 
 int item::get_coverage() const

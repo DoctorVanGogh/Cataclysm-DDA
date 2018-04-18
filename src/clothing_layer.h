@@ -15,20 +15,23 @@ class clothing_layer
 {
         friend class DynamicDataLoader;
     public:
-		/** Fetches flag definition (or null flag if not found) */
-		static const clothing_layer &get( const std::string &id );
+
+		static const clothing_layer& get( const std::string &id );
+		static const clothing_layer& get( const layer_level &leval );
+
+		const nc_color& color() const;
+		const char& symbol() const;
 
     private:
-        const std::string id;
-        char symbol;
-        nc_color color;
-        layer_level level;
+        const std::string _id;
+        char _symbol;
+        nc_color _color;
+        layer_level _level;
 
-
-        clothing_layer( const std::string &id = std::string() ) : id( id ) {}
+        clothing_layer( const std::string &id = std::string() ) : _id( id ) {}
 
         static void load( JsonObject &jo );
-
+		static void check_consistency();
         static void reset();
 
 };

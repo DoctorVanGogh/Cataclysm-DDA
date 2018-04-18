@@ -1316,6 +1316,8 @@ public:
 
 		layer_level layer() const;
 
+		const std::string clothingLayer() const;
+
         /**
          * Returns the relative coverage that this item has when worn.
          * Values range from 0 (not covering anything, or no armor at all) to

@@ -492,6 +492,7 @@ void DynamicDataLoader::check_consistency( loading_ui &ui )
         { _( "Overmap locations" ), &overmap_locations::check_consistency },
         { _( "Overmap specials" ), &overmap_specials::check_consistency },
         { _( "Ammunition types" ), &ammunition_type::check_consistency },
+	    { _( "Clothing layers" ), &clothing_layer::check_consistency },
         { _( "Traps" ), &trap::check_consistency },
         { _( "Bionics" ), &check_bionics },
         { _( "Gates" ), &gates::check },
